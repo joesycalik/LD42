@@ -27,6 +27,9 @@ namespace Assets.Scripts.Level
         //Mesh for Cells
         CellMesh cellMesh;
 
+        //Cell Camera
+        public CellCamera cellCamera;
+
         //Get components, instantiate lists, and create the Cell grid
         private void Awake()
         {
@@ -74,6 +77,9 @@ namespace Assets.Scripts.Level
             //Create the new Cell grid
             CreateCells();
             Refresh();
+
+            //Refresh the camera
+            cellCamera.ResetCamera(cellCountX, cellCountZ);
 
             return true;
         } //End CreateLevel()
