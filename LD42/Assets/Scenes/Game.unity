@@ -335,6 +335,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellGrid: {fileID: 452484205}
   currentCell: {fileID: 0}
+  spriteRenderer: {fileID: 1810069796}
 --- !u!4 &350843330
 Transform:
   m_ObjectHideFlags: 0
@@ -483,7 +484,6 @@ MonoBehaviour:
   timeSinceLastBlockSpawn: 0
   blockSpawnerTime: 2
   spawnLocations: 
-  player: {fileID: 0}
 --- !u!4 &452484206
 Transform:
   m_ObjectHideFlags: 0
@@ -948,7 +948,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 8aeed20b7f8ff7841b9237e8c3c623ec, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
+  m_FlipX: 1
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 7.17, y: 6.51}

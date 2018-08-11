@@ -8,6 +8,8 @@ public class Player : MonoBehaviour {
 
     public Cell currentCell;
 
+    public SpriteRenderer spriteRenderer;
+
     private void Start()
     {
         currentCell = cellGrid.cells[0];
@@ -29,6 +31,10 @@ public class Player : MonoBehaviour {
         else if (Input.GetKeyUp(KeyCode.A))
         {
             Move(Direction.WEST);
+            if (spriteRenderer.flipX)
+            {
+                spriteRenderer.flipX = false;
+            }
         }
         //Move down
         else if (Input.GetKeyUp(KeyCode.S))
@@ -39,6 +45,10 @@ public class Player : MonoBehaviour {
         else if (Input.GetKeyUp(KeyCode.D))
         {
             Move(Direction.EAST);
+            if (!spriteRenderer.flipX)
+            {
+                spriteRenderer.flipX = true;
+            }
         }
     }
 
