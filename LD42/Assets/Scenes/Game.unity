@@ -392,10 +392,7 @@ MonoBehaviour:
     type: 2}
   cells: []
   colors:
-  - {r: 1, g: 0, b: 0, a: 0}
-  - {r: 1, g: 0.6085619, b: 0, a: 0}
-  - {r: 1, g: 0.9747956, b: 0, a: 0}
-  - {r: 0.57713556, g: 1, b: 0, a: 0}
+  - {r: 1, g: 0, b: 0.058333397, a: 0}
   cellCamera: {fileID: 351218982}
   difficulty: 0
   spawnLocations: 
