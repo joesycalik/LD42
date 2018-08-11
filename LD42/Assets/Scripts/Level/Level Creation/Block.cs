@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections;
 using UnityEngine;
 
 public class Block : MonoBehaviour
@@ -14,8 +11,8 @@ public class Block : MonoBehaviour
     public Sprite movingSprite;
     public Sprite placedSprite;
 
-    float movingBlockY = 0.4f;
-    float placedBlockY = 0.3f;
+    float movingBlockY = 0.5f;
+    float placedBlockY = 0.40f;
 
     public float timeSinceLastMove;
 
@@ -23,9 +20,14 @@ public class Block : MonoBehaviour
 
     Cell currentCell;
 
+    bool moving;
+
+    Animator anim;
+
     private void Start()
     {
         spriteRenderer.sprite = movingSprite;
+        anim = GetComponent<Animator>();
     }
 
     private void Update()
@@ -37,7 +39,10 @@ public class Block : MonoBehaviour
             {
                 //Action
                 timeSinceLastMove = 0;
-                Move();
+                if (!moving)
+                {
+                    Move();
+                }
             }
         }
     }
@@ -47,37 +52,53 @@ public class Block : MonoBehaviour
         startPos = transform.position;
     }
 
-    void Move()
+    private void Move()
     {
+        moving = true;
+        Vector3 targetPosition = new Vector3(0, 0, 0);
+        Vector3 startPosition = transform.position;
         //Spawned on the bottom of the screen
         if (startPos.z < 0)
         {
-            transform.position = new Vector3(transform.position.x, movingBlockY, transform.position.z + 20);
+            targetPosition = new Vector3(transform.localPosition.x, movingBlockY, transform.position.z + 20);
         }
         //Spawned on the left side of the screen
         else if (startPos.x < 0)
         {
-            transform.position = new Vector3(transform.position.x + 20, movingBlockY, transform.position.z);
+            targetPosition = new Vector3(transform.localPosition.x + 20, movingBlockY, transform.position.z);
         }
         //Spawned on the top of the screen
         if (startPos.z > (cellGrid.cellCountZ * 18))
         {
-            transform.position = new Vector3(transform.position.x, movingBlockY, transform.position.z - 20);
+            targetPosition = new Vector3(transform.localPosition.x, movingBlockY, transform.position.z - 20);
         }
         //Spawned on the right side of the screen
         else if (startPos.x > (cellGrid.cellCountX * 18))
         {
-            transform.position = new Vector3(transform.position.x - 20, movingBlockY, transform.position.z);
+            targetPosition = new Vector3(transform.localPosition.x - 20, movingBlockY, transform.position.z);
         }
+
+        StartCoroutine(AnimateMove(startPosition, targetPosition)); 
+    }
+
+    IEnumerator AnimateMove(Vector3 startPos, Vector3 targetPos)
+    {
+        float t = Time.deltaTime * 5f;
+        for (; t < 1f; t += Time.deltaTime * 5f)
+        {
+            transform.localPosition = Vector3.Lerp(startPos, targetPos, t);
+            yield return null;
+        }
+
+        transform.position = targetPos;
 
         if (transform.position.x < 0 || transform.position.x > (cellGrid.cellCountX * 18)
             || transform.position.z < 0 || transform.position.z > (cellGrid.cellCountX * 18))
         {
             Destroy(gameObject);
-            return;
         }
 
-        if (!BlockUnderneath())
+        if (!BlockUnderneath() && GetCellBelow() != null)
         {
             bool placeBlock = UnityEngine.Random.Range(0, 10) > 8 ? true : false;
             if (placeBlock)
@@ -85,14 +106,17 @@ public class Block : MonoBehaviour
                 PlaceBlock();
             }
         }
+
+        moving = false;
     }
 
     void PlaceBlock()
     {
         transform.position = new Vector3(transform.position.x, placedBlockY, transform.position.z);
-        currentCell = Helpers.GetCellUnderPosition(cellGrid, transform.position);
+        currentCell = GetCellBelow();
         currentCell.block = this;
         spriteRenderer.sprite = placedSprite;
+        spriteRenderer.sortingOrder = 1;
         placed = true;
         if (currentCell.player != null)
         {
@@ -102,7 +126,7 @@ public class Block : MonoBehaviour
 
     bool BlockUnderneath()
     {
-        if (Helpers.GetCellUnderPosition(cellGrid, transform.position).HasBlock())
+        if (GetCellBelow() && GetCellBelow().HasBlock())
         {
             return true;
         }
@@ -110,6 +134,11 @@ public class Block : MonoBehaviour
         {
             return false;
         }
+    }
+
+    Cell GetCellBelow()
+    {
+        return Helpers.GetCellUnderPosition(cellGrid, transform.position);
     }
 
     public void TakeHit()

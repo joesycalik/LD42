@@ -16,10 +16,14 @@ public class Player : MonoBehaviour {
 
     int score = 0;
 
+    Vector3 yVector = new Vector3(0, 0.45f, 0);
+
+    bool moving;
+
     private void Start()
     {
         currentCell = cellGrid.cells[Random.Range(0, cellGrid.cells.Length)];
-        transform.position = currentCell.transform.position + new Vector3(0, 0.25f, 0);
+        transform.position = currentCell.transform.position + yVector;
     }
 
     // Update is called once per frame
@@ -41,32 +45,33 @@ public class Player : MonoBehaviour {
     void HandleInput()
     {
         //Move up
-        if (Input.GetKeyUp(KeyCode.W))
+        if (Input.GetKey(KeyCode.W) && !moving)
         {
             Move(Direction.NORTH);
         }
         //Move left
-        else if (Input.GetKeyUp(KeyCode.A))
+        else if (Input.GetKey(KeyCode.A) && !moving)
         {
-            Move(Direction.WEST);
             if (spriteRenderer.flipX)
             {
                 spriteRenderer.flipX = false;
             }
+
+            Move(Direction.WEST);
         }
         //Move down
-        else if (Input.GetKeyUp(KeyCode.S))
+        else if (Input.GetKey(KeyCode.S) && !moving)
         {
             Move(Direction.SOUTH);
         }
         //Move right
-        else if (Input.GetKeyUp(KeyCode.D))
+        else if (Input.GetKey(KeyCode.D) && !moving)
         {
-            Move(Direction.EAST);
             if (!spriteRenderer.flipX)
             {
                 spriteRenderer.flipX = true;
             }
+            Move(Direction.EAST);
         }
     }
 
@@ -75,21 +80,26 @@ public class Player : MonoBehaviour {
         Cell targetCell = currentCell.GetNeighbor(direction);
         if (targetCell && !targetCell.HasBlock())
         {
+            moving = true;
             currentCell.player = null;
+            Vector3 startPos = transform.position;
             currentCell = targetCell;
             currentCell.player = this;
-            transform.position = currentCell.transform.localPosition + new Vector3(0, 0.25f, 0);
+            Vector3 targetPosition = currentCell.transform.localPosition + yVector;
+            StartCoroutine(AnimateMove(startPos, targetPosition));
         }
         else if (targetCell && targetCell.HasBlock())
         {
             if (canAttack)
             {
+                moving = true;
                 StartCoroutine(AttackBlock(direction));
                 targetCell.block.TakeHit();
                 if (targetCell.block == null)
                 {
                     IncreaseScore();
                 }
+                moving = false;
             }
         }
     }
@@ -106,7 +116,7 @@ public class Player : MonoBehaviour {
     
     IEnumerator AttackBlock(Direction direction)
     {
-        Vector3 startPos = transform.position;
+        Vector3 startPos = currentCell.transform.position + yVector;
         Vector3 delta;
         switch (direction)
         {
@@ -131,21 +141,35 @@ public class Player : MonoBehaviour {
                 break;
         }
         float t = Time.deltaTime;
-        for (; t < 0.10f; t += Time.deltaTime)
+        for (; t < 0.01f; t += Time.deltaTime)
         {
             transform.position = Vector3.Lerp(startPos, startPos + delta, t);
             yield return null;
         }
 
-        for (; t < 0.15f; t += Time.deltaTime)
+        for (; t < 0.025f; t += Time.deltaTime)
         {
             transform.position = Vector3.Lerp(startPos + delta, startPos, t);
             yield return null;
         }
 
-        transform.position = currentCell.transform.position + new Vector3(0, 0.25f, 0);
+        transform.position = currentCell.transform.position + yVector;
         canAttack = false;
         timeSinceLastAttack = 0;
+    }
+
+    IEnumerator AnimateMove(Vector3 startPos, Vector3 targetPos)
+    {
+        float t = Time.deltaTime * 6.75f;
+        for (; t < 1f; t += Time.deltaTime * 6.75f)
+        {
+            transform.localPosition = Vector3.Lerp(startPos, targetPos, t);
+            yield return null;
+        }
+
+        transform.position = targetPos;
+
+        moving = false;
     }
 
     public void Die()

@@ -276,7 +276,15 @@ public class CellGrid : MonoBehaviour
         CellCoordinates coordinates = CellCoordinates.ConvertToCoords(position);
 
         int index = coordinates.X + (coordinates.Z * cellCountX);
-        return cells[index];
+        if (index < cells.Length && index > 0)
+        {
+            return cells[index];
+        }
+        else
+        {
+            return null;
+        }
+        
     } //End GetCell(position)
 
     public Player GetPlayer()
