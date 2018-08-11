@@ -24,19 +24,30 @@ public class CellGrid : MonoBehaviour
     //Cell Camera
     public CellCamera cellCamera;
 
-    public List<Block> blocks;
     public float timeSinceLastBlockSpawn;
-    public int blockSpawnerTime = 2;
+    public float baseSpawnerTime = 5f;
+    public float spawnerAdjustmentValue = 0.05f;
+    public float blockSpawnerTime = 5f;
+    public int ticksSinceLastSpawn = 0;
+    public int lastSpawnTicks;
+
+    public float baseBlockMoveCooldown = 2f;
+    public float blockMoveCooldownAdjustmentValue = 0.1f;
+    public float blockMoveCooldown = 0.5f;
+
+    public int difficulty = 0;
+    public float timeElapsed = 0;
 
     public int[] spawnLocations;
 
     bool triangulate = true;
 
+    int ticks;
+    float waitTime = 0.25f;
+
     //Get components, instantiate lists, and create the Cell grid
     private void Awake()
     {
-        blocks = new List<Block>();
-
         cellMesh = GetComponentInChildren<CellMesh>();
 
         CellMetrics.colors = colors;
@@ -47,15 +58,35 @@ public class CellGrid : MonoBehaviour
         spawnLocations = locations;
     } //End Awake()
 
+    private void Start()
+    {
+        StartCoroutine(Timer());
+    }
+
     private void Update()
     {
-        timeSinceLastBlockSpawn += Time.deltaTime;
-        if (timeSinceLastBlockSpawn > blockSpawnerTime)
+        ticksSinceLastSpawn = ticks - lastSpawnTicks;
+        if (ticksSinceLastSpawn >= blockSpawnerTime)
         {
             //Action
-            timeSinceLastBlockSpawn = 0;
+            ticksSinceLastSpawn = 0;
             SpawnBlock();
         }
+    }
+
+    //Update the difficulty of the game as time elapses
+    private void FixedUpdate()
+    {
+        difficulty = ticks / 120;
+        blockSpawnerTime = baseSpawnerTime - (difficulty * spawnerAdjustmentValue);
+        blockMoveCooldown = baseBlockMoveCooldown - (difficulty * blockMoveCooldownAdjustmentValue);
+    }
+
+    IEnumerator Timer()
+    {
+        yield return new WaitForSeconds(waitTime);
+        ticks++;
+        StartCoroutine(Timer());
     }
 
     void SpawnBlock()
@@ -80,9 +111,9 @@ public class CellGrid : MonoBehaviour
             newBlock.transform.position = newBlock.transform.position + new Vector3(spawnX * 20, 0, spawnLocations[spawnZ] * 20);
             newBlock.SetStartPosition();
         }
-        
-        blocks.Add(newBlock);
+
         newBlock.cellGrid = this;
+        lastSpawnTicks = ticks;
     }
 
     //Re-Triangulate the Cell grid to refresh properties

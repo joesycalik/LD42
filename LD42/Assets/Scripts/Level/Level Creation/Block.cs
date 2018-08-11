@@ -15,9 +15,8 @@ public class Block : MonoBehaviour
     public Sprite placedSprite;
 
     public float timeSinceLastMove;
-    public int moveCooldownTimer = 1;
 
-    bool moved = false;
+    int hp = 3;
 
     Cell currentCell;
 
@@ -31,7 +30,7 @@ public class Block : MonoBehaviour
         if (!placed && startPos != null)
         {
             timeSinceLastMove += Time.deltaTime;
-            if (timeSinceLastMove > moveCooldownTimer)
+            if (timeSinceLastMove > cellGrid.blockMoveCooldown)
             {
                 //Action
                 timeSinceLastMove = 0;
@@ -68,12 +67,9 @@ public class Block : MonoBehaviour
             transform.position = new Vector3(transform.position.x - 20, transform.position.y, transform.position.z);
         }
 
-        moved = true;
-
         if (transform.position.x < 0 || transform.position.x > (cellGrid.cellCountX * 18)
             || transform.position.z < 0 || transform.position.z > (cellGrid.cellCountX * 18))
         {
-            cellGrid.blocks.Remove(this);
             Destroy(gameObject);
             return;
         }
@@ -109,6 +105,16 @@ public class Block : MonoBehaviour
         else
         {
             return false;
+        }
+    }
+
+    public void TakeHit()
+    {
+        hp -= 1;
+        if (hp <= 0)
+        {
+            currentCell.block = null;
+            Destroy(gameObject);
         }
     }
 }

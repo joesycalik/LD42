@@ -336,6 +336,7 @@ MonoBehaviour:
   cellGrid: {fileID: 452484205}
   currentCell: {fileID: 0}
   spriteRenderer: {fileID: 1810069796}
+  attackAnimSpeed: 3
 --- !u!4 &350843330
 Transform:
   m_ObjectHideFlags: 0
