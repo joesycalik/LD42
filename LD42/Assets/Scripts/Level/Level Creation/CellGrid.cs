@@ -15,6 +15,8 @@ public class CellGrid : MonoBehaviour
     public Cell cellPrefab;
     public Block blockPrefab;
 
+    public Player playerPrefab;
+
     //Arrays and Lists for Cells and Level objects
     public Cell[] cells;
     public Color[] colors;
@@ -24,96 +26,139 @@ public class CellGrid : MonoBehaviour
     //Cell Camera
     public CellCamera cellCamera;
 
-    public float timeSinceLastBlockSpawn;
-    public float baseSpawnerTime = 5f;
-    public float spawnerAdjustmentValue = 0.05f;
-    public float blockSpawnerTime = 5f;
-    public int ticksSinceLastSpawn = 0;
-    public int lastSpawnTicks;
+    float timeSinceLastSpawn = 0;
+    float spawnTimer = 5f;
+    int spawnRate = 5;
 
-    public float baseBlockMoveCooldown = 2f;
-    public float blockMoveCooldownAdjustmentValue = 0.1f;
-    public float blockMoveCooldown = 0.5f;
+    float baseBlockMoveCooldown = 1f;
+    float blockMoveCooldown = 2f;
 
-    public int difficulty = 0;
-    public float timeElapsed = 0;
+    Player player;
+
+    public float GetBlockMoveCooldown()
+    {
+        return blockMoveCooldown;
+    }
+
+    public int difficulty;
 
     public int[] spawnLocations;
 
     bool triangulate = true;
 
-    int ticks;
-    float waitTime = 0.25f;
+    public struct SpawnLocation
+    {
+        public int x;
+        public int z;
+    }
+
+    List<SpawnLocation> spawnsThisRound;
 
     //Get components, instantiate lists, and create the Cell grid
     private void Awake()
     {
         cellMesh = GetComponentInChildren<CellMesh>();
+        NewGame();
+    } //End Awake()
+
+    public void NewGame()
+    {
+        spawnsThisRound = new List<SpawnLocation>();
+        player = Instantiate(playerPrefab);
+        player.cellGrid = this;
 
         CellMetrics.colors = colors;
 
         CreateLevel(cellCountX, cellCountZ);
-
-        int[] locations = { -1, 0, cellCountX};
-        spawnLocations = locations;
-    } //End Awake()
-
-    private void Start()
-    {
-        StartCoroutine(Timer());
     }
 
     private void Update()
     {
-        ticksSinceLastSpawn = ticks - lastSpawnTicks;
-        if (ticksSinceLastSpawn >= blockSpawnerTime)
+
+        spawnRate = (int) difficulty / 3;
+        if (spawnRate > 10)
+        {
+            spawnRate = 10;
+        }
+        else if (spawnRate < 1)
+        {
+            spawnRate = 1;
+        }
+
+        spawnTimer = 2 - (difficulty * 0.1f);
+        if (spawnTimer < 0.2f)
+        {
+            spawnTimer = 0.2f;
+        }
+
+        blockMoveCooldown = 2 - ((difficulty / 3) * 0.1f);
+        if (blockMoveCooldown < 0.1f)
+        {
+            blockMoveCooldown = 0.1f;
+        }
+
+        timeSinceLastSpawn += Time.deltaTime;
+        if (timeSinceLastSpawn > spawnTimer)
         {
             //Action
-            ticksSinceLastSpawn = 0;
-            SpawnBlock();
+            timeSinceLastSpawn = 0;
+            for (int i = 0; i < spawnRate; i++)
+            {
+                SpawnBlock();
+            }
+            spawnsThisRound.Clear();
         }
-    }
-
-    //Update the difficulty of the game as time elapses
-    private void FixedUpdate()
-    {
-        difficulty = ticks / 120;
-        blockSpawnerTime = baseSpawnerTime - (difficulty * spawnerAdjustmentValue);
-        blockMoveCooldown = baseBlockMoveCooldown - (difficulty * blockMoveCooldownAdjustmentValue);
-    }
-
-    IEnumerator Timer()
-    {
-        yield return new WaitForSeconds(waitTime);
-        ticks++;
-        StartCoroutine(Timer());
     }
 
     void SpawnBlock()
     {
-        int spawnX = Random.Range(0, 3);
-        int spawnZ = 1;
-        Block newBlock = Instantiate<Block>(blockPrefab);
-        if (spawnX == 0 || spawnX == 2)
+        SpawnLocation spawn = new SpawnLocation();
+        spawn.x = Random.Range(-1, cellCountX + 1);
+        spawn.z = Random.Range(-1, cellCountX + 1);
+
+        if (BadValueCheck(spawn))
         {
-            spawnZ = Random.Range(0, cellCountX - 1);
-            newBlock.transform.position = newBlock.transform.position + new Vector3(spawnLocations[spawnX] * 20, 0, spawnZ * 20);
-            newBlock.SetStartPosition();
+            SpawnBlock();
+            return;
+        }
+
+        if (spawn.x != -1 && spawn.z != -1 && 
+            spawn.x != cellCountX && spawn.z != cellCountX)
+        {
+            SpawnBlock();
+            return;
+        }
+
+        foreach (SpawnLocation spawnLocation in spawnsThisRound)
+        {
+            if (spawnLocation.x == spawn.x && spawnLocation.z == spawn.z)
+            {
+                SpawnBlock();
+                return;
+            }
+        }
+
+        Block newBlock = Instantiate<Block>(blockPrefab);        
+
+        newBlock.transform.position = newBlock.transform.position + new Vector3(spawn.x * 20, 0, spawn.z * 20);
+        spawnsThisRound.Add(spawn);
+        newBlock.SetStartPosition();
+        newBlock.cellGrid = this;
+    }
+
+    bool BadValueCheck(SpawnLocation spawn)
+    {
+        if ((spawn.x == -1 && spawn.z == -1) ||
+            (spawn.x == -1 && spawn.z == cellCountX) ||
+            (spawn.x == -1 && spawn.z == cellCountX) ||
+            (spawn.x == cellCountX && spawn.z == cellCountX))
+        {
+            return true;
         }
         else
         {
-            while (spawnZ == 1)
-            {
-                spawnZ = Random.Range(0, 3);
-            }
-            spawnX = Random.Range(0, cellCountX - 1);
-
-            newBlock.transform.position = newBlock.transform.position + new Vector3(spawnX * 20, 0, spawnLocations[spawnZ] * 20);
-            newBlock.SetStartPosition();
+            return false;
         }
-
-        newBlock.cellGrid = this;
-        lastSpawnTicks = ticks;
     }
 
     //Re-Triangulate the Cell grid to refresh properties
@@ -143,7 +188,6 @@ public class CellGrid : MonoBehaviour
         {
             for (int i = 0; i < cells.Length; i++)
             {
-                Destroy(cells[i].uiRect.gameObject);
                 Destroy(cells[i].gameObject);
             }
         }
@@ -230,4 +274,9 @@ public class CellGrid : MonoBehaviour
         int index = coordinates.X + (coordinates.Z * cellCountX);
         return cells[index];
     } //End GetCell(position)
+
+    public Player GetPlayer()
+    {
+        return player;
+    }
 } //End CellGrid class

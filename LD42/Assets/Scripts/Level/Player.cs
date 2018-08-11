@@ -14,9 +14,12 @@ public class Player : MonoBehaviour {
     float attackCooldown = 0.10f;
     bool canAttack;
 
+    int score = 0;
+
     private void Start()
     {
-        currentCell = cellGrid.cells[0];
+        currentCell = cellGrid.cells[Random.Range(0, cellGrid.cells.Length)];
+        transform.position = currentCell.transform.position + new Vector3(0, 0.2f, 0);
     }
 
     // Update is called once per frame
@@ -75,7 +78,7 @@ public class Player : MonoBehaviour {
             currentCell.player = null;
             currentCell = targetCell;
             currentCell.player = this;
-            transform.position = currentCell.transform.position + new Vector3(0, 0.2f, 0);
+            transform.position = currentCell.transform.localPosition + new Vector3(0, 0.2f, 0);
         }
         else if (targetCell && targetCell.HasBlock())
         {
@@ -83,11 +86,24 @@ public class Player : MonoBehaviour {
             {
                 StartCoroutine(AttackBlock(direction));
                 targetCell.block.TakeHit();
+                if (targetCell.block == null)
+                {
+                    IncreaseScore();
+                }
             }
         }
     }
 
-    public int attackAnimSpeed = 5;
+    void IncreaseScore()
+    {
+        score++;
+    }
+
+    public int GetScore()
+    {
+        return score;
+    }
+    
     IEnumerator AttackBlock(Direction direction)
     {
         Vector3 startPos = transform.position;

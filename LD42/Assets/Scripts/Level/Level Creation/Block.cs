@@ -14,6 +14,9 @@ public class Block : MonoBehaviour
     public Sprite movingSprite;
     public Sprite placedSprite;
 
+    float movingBlockY = 0.4f;
+    float placedBlockY = 0.3f;
+
     public float timeSinceLastMove;
 
     int hp = 3;
@@ -30,7 +33,7 @@ public class Block : MonoBehaviour
         if (!placed && startPos != null)
         {
             timeSinceLastMove += Time.deltaTime;
-            if (timeSinceLastMove > cellGrid.blockMoveCooldown)
+            if (timeSinceLastMove > cellGrid.GetBlockMoveCooldown())
             {
                 //Action
                 timeSinceLastMove = 0;
@@ -49,22 +52,22 @@ public class Block : MonoBehaviour
         //Spawned on the bottom of the screen
         if (startPos.z < 0)
         {
-            transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + 20);
+            transform.position = new Vector3(transform.position.x, movingBlockY, transform.position.z + 20);
         }
         //Spawned on the left side of the screen
         else if (startPos.x < 0)
         {
-            transform.position = new Vector3(transform.position.x + 20, transform.position.y, transform.position.z);
+            transform.position = new Vector3(transform.position.x + 20, movingBlockY, transform.position.z);
         }
         //Spawned on the top of the screen
         if (startPos.z > (cellGrid.cellCountZ * 18))
         {
-            transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - 20);
+            transform.position = new Vector3(transform.position.x, movingBlockY, transform.position.z - 20);
         }
         //Spawned on the right side of the screen
         else if (startPos.x > (cellGrid.cellCountX * 18))
         {
-            transform.position = new Vector3(transform.position.x - 20, transform.position.y, transform.position.z);
+            transform.position = new Vector3(transform.position.x - 20, movingBlockY, transform.position.z);
         }
 
         if (transform.position.x < 0 || transform.position.x > (cellGrid.cellCountX * 18)
@@ -86,6 +89,7 @@ public class Block : MonoBehaviour
 
     void PlaceBlock()
     {
+        transform.position = new Vector3(transform.position.x, placedBlockY, transform.position.z);
         currentCell = Helpers.GetCellUnderPosition(cellGrid, transform.position);
         currentCell.block = this;
         spriteRenderer.sprite = placedSprite;

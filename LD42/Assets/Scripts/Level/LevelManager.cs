@@ -13,19 +13,43 @@ using UnityEngine.UI;
 /// </summary>
 public class LevelManager : MonoBehaviour
 {
-
     //Needs a reference to the CellGrid
     public CellGrid cellGrid;
+    public Text timeElapsedText, levelText, scoreText;
+    public GameOverMenu gameOverMenu;
+
+    int level;
+    float timeElapsed;
+    float gameStartTime;
+
+    private void Start()
+    {
+        gameStartTime = Time.time;
+    }
 
     //Check for user input
     private void Update()
     {
+        timeElapsed = Time.time - gameStartTime;
+        cellGrid.difficulty = (int)(timeElapsed / 5) + 1;
 
+        UpdateUI();
+
+        CheckForGameEnd();
     } //End Update()
+
+    public void CheckForGameEnd()
+    {
+        if (!cellGrid.GetPlayer())
+        {
+            gameOverMenu.Open();
+        }
+    }
 
     public void RestartGame()
     {
-
+        cellGrid.NewGame();
+        gameStartTime = Time.time;
     }
 
     public void ReturnToMenu()
@@ -33,46 +57,20 @@ public class LevelManager : MonoBehaviour
         Helpers.ReturnToMenu();
     }
 
-    //Reset UI and Level Stats
-    void ResetUI()
-    {
-        //loadedLevelText.text = GameManager.instance.loadedLevelText;
-        //totalMoves = 0;
-        //totalGoals = cellGrid.goals.Count;
-        //cellGrid.occupiedGoals.Clear();
-        //occupiedGoals = 0;
-
-        ////Scale minimumGoalsForWin based on totalGoals
-        //if (totalGoals > 2)
-        //{
-        //    minimumGoalsForWin = Mathf.FloorToInt(totalGoals / 2.75f +  totalGoals / 3.3f);
-        //}
-        ////If totalGoals < 2, all goals must be filled to win
-        //else
-        //{
-        //    minimumGoalsForWin = totalGoals;
-        //}
-    } //End LoadNewLevel()
-
     //Update the Level Stats and their UI elements
     void UpdateUI()
     {
-        //occupiedGoals = cellGrid.occupiedGoals.Count;
+        timeElapsedText.text = "Time Elapsed: " + timeElapsed.ToString("00");
+        scoreText.text = "Score: " + cellGrid.GetPlayer().GetScore();
+    } //End UpdateUI()
 
-        //goalsText.text = "Goals: " + occupiedGoals + "/" + totalGoals;
-        //movesText.text = "Moves: " + totalMoves;
+    public void DestroyAllBlocks()
+    {
+        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Block");
 
-        ////If player has met the win condition
-        //    //Set requiredGoalsText to green
-        //if (occupiedGoals == totalGoals)
-        //{
-        //    goalsText.color = Color.green;
-        //}
-        ////If player has yet to meet the win condition
-        //    //Set requiredGoalsText to red
-        //else
-        //{
-        //    goalsText.color = Color.red;
-        //} 
-    } //End UpdateLevelStats()
+        for (var i = 0; i < gameObjects.Length; i++)
+        {
+            Destroy(gameObjects[i]);
+        }
+    }
 } //End LevelManager class
