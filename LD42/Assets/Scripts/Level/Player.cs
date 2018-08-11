@@ -19,7 +19,7 @@ public class Player : MonoBehaviour {
     private void Start()
     {
         currentCell = cellGrid.cells[Random.Range(0, cellGrid.cells.Length)];
-        transform.position = currentCell.transform.position + new Vector3(0, 0.2f, 0);
+        transform.position = currentCell.transform.position + new Vector3(0, 0.25f, 0);
     }
 
     // Update is called once per frame
@@ -78,7 +78,7 @@ public class Player : MonoBehaviour {
             currentCell.player = null;
             currentCell = targetCell;
             currentCell.player = this;
-            transform.position = currentCell.transform.localPosition + new Vector3(0, 0.2f, 0);
+            transform.position = currentCell.transform.localPosition + new Vector3(0, 0.25f, 0);
         }
         else if (targetCell && targetCell.HasBlock())
         {
@@ -143,7 +143,7 @@ public class Player : MonoBehaviour {
             yield return null;
         }
 
-        transform.position = currentCell.transform.position + new Vector3(0, 0.2f, 0);
+        transform.position = currentCell.transform.position + new Vector3(0, 0.25f, 0);
         canAttack = false;
         timeSinceLastAttack = 0;
     }
