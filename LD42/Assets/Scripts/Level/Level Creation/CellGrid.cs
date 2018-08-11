@@ -64,6 +64,10 @@ public class CellGrid : MonoBehaviour
     public void NewGame()
     {
         spawnsThisRound = new List<SpawnLocation>();
+        if (player)
+        {
+            Destroy(player.gameObject);
+        }
         player = Instantiate(playerPrefab);
         player.cellGrid = this;
 

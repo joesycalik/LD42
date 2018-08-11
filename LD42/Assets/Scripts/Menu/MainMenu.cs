@@ -5,6 +5,7 @@ using System.IO;
 
 public class MainMenu : MonoBehaviour
 {
+    public GameObject howToPlayMenu;
 
     public void Play()
     {
@@ -14,5 +15,17 @@ public class MainMenu : MonoBehaviour
     public void Quit()
     {
         Application.Quit();
+    }
+
+    public void OpenHowToPlay()
+    {
+        gameObject.SetActive(false);
+        howToPlayMenu.SetActive(true);
+    }
+
+    public void CloseHowToPlay()
+    {
+        gameObject.SetActive(true);
+        howToPlayMenu.SetActive(false);
     }
 }
