@@ -467,6 +467,7 @@ MonoBehaviour:
   colors:
   - {r: 1, g: 0, b: 0.058333397, a: 0}
   cellCamera: {fileID: 351218982}
+  blockMoveSpeed: 5
   difficulty: 0
   spawnLocations: 
 --- !u!4 &452484206
@@ -938,7 +939,7 @@ MonoBehaviour:
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -1622,7 +1623,7 @@ MonoBehaviour:
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96

@@ -55,12 +55,12 @@ public class Player : MonoBehaviour {
     void HandleInput()
     {
         //Move up
-        if (Input.GetKey(KeyCode.W) && !moving)
+        if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) && !moving)
         {
             Move(Direction.NORTH);
         }
         //Move left
-        else if (Input.GetKey(KeyCode.A) && !moving)
+        else if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) && !moving)
         {
             if (spriteRenderer.flipX)
             {
@@ -71,12 +71,12 @@ public class Player : MonoBehaviour {
             Move(Direction.WEST);
         }
         //Move down
-        else if (Input.GetKey(KeyCode.S) && !moving)
+        else if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) && !moving)
         {
             Move(Direction.SOUTH);
         }
         //Move right
-        else if (Input.GetKey(KeyCode.D) && !moving)
+        else if ((Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) && !moving)
         {
             if (!spriteRenderer.flipX)
             {
@@ -127,6 +127,7 @@ public class Player : MonoBehaviour {
             currentCell = targetCell;
             currentCell.player = this;
             Vector3 targetPosition = currentCell.transform.localPosition + yVector;
+            GameSoundManager.instance.PlayMoveSound();
             StartCoroutine(AnimateMove(startPos, targetPosition));
         }
         else if (targetCell && targetCell.HasBlock())
@@ -135,6 +136,7 @@ public class Player : MonoBehaviour {
             {
                 canAttack = false;
                 moving = true;
+                GameSoundManager.instance.PlayAtttackSound();
                 StartCoroutine(AttackBlock(direction));
                 StartCoroutine(targetCell.block.TakeHit());
                 moving = false;
@@ -230,6 +232,7 @@ public class Player : MonoBehaviour {
 
     public void Die()
     {
+        GameSoundManager.instance.PlayPlayerDeathSound();
         Destroy(gameObject);
     }
 }

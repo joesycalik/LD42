@@ -33,6 +33,8 @@ public class Block : MonoBehaviour
 
     int damagedSpriteID = -1;
 
+    bool placing;
+
     private void Start()
     {
         spriteRenderer.sprite = movingSprite;
@@ -66,31 +68,34 @@ public class Block : MonoBehaviour
 
     private void Move()
     {
-        moving = true;
-        Vector3 targetPosition = new Vector3(0, 0, 0);
-        Vector3 startPosition = transform.position;
-        //Spawned on the bottom of the screen
-        if (startPos.z < 0)
+        if (!placing)
         {
-            targetPosition = new Vector3(transform.localPosition.x, movingBlockY, transform.position.z + 20);
-        }
-        //Spawned on the left side of the screen
-        else if (startPos.x < 0)
-        {
-            targetPosition = new Vector3(transform.localPosition.x + 20, movingBlockY, transform.position.z);
-        }
-        //Spawned on the top of the screen
-        if (startPos.z > (cellGrid.cellCountZ * 18))
-        {
-            targetPosition = new Vector3(transform.localPosition.x, movingBlockY, transform.position.z - 20);
-        }
-        //Spawned on the right side of the screen
-        else if (startPos.x > (cellGrid.cellCountX * 18))
-        {
-            targetPosition = new Vector3(transform.localPosition.x - 20, movingBlockY, transform.position.z);
-        }
+            moving = true;
+            Vector3 targetPosition = new Vector3(0, 0, 0);
+            Vector3 startPosition = transform.position;
+            //Spawned on the bottom of the screen
+            if (startPos.z < 0)
+            {
+                targetPosition = new Vector3(transform.localPosition.x, movingBlockY, transform.position.z + 20);
+            }
+            //Spawned on the left side of the screen
+            else if (startPos.x < 0)
+            {
+                targetPosition = new Vector3(transform.localPosition.x + 20, movingBlockY, transform.position.z);
+            }
+            //Spawned on the top of the screen
+            if (startPos.z > (cellGrid.cellCountZ * 18))
+            {
+                targetPosition = new Vector3(transform.localPosition.x, movingBlockY, transform.position.z - 20);
+            }
+            //Spawned on the right side of the screen
+            else if (startPos.x > (cellGrid.cellCountX * 18))
+            {
+                targetPosition = new Vector3(transform.localPosition.x - 20, movingBlockY, transform.position.z);
+            }
 
-        StartCoroutine(AnimateMove(startPosition, targetPosition));
+            StartCoroutine(AnimateMove(startPosition, targetPosition));
+        }
     }
 
     IEnumerator AnimateMove(Vector3 startPos, Vector3 targetPos)
@@ -122,19 +127,29 @@ public class Block : MonoBehaviour
         moving = false;
     }
 
+    float redFlashTime = 0.25f;
+    float blueFlashTime = 0.15f;
+
     IEnumerator PlaceBlock()
     {
+        placing = true;
         transform.position = new Vector3(transform.position.x, placedBlockY, transform.position.z);
+
+        //GameSoundManager.instance.PlayWarningSound();
 
         for (int i = 0; i < 3; i++)
         {
+            GameSoundManager.instance.PlayRedBlockSound();
             spriteRenderer.sprite = warningSprite;
             spriteRenderer.sortingOrder = 4;
-            yield return new WaitForSeconds(0.25f);
+            yield return new WaitForSeconds(redFlashTime);
+            //GameSoundManager.instance.PlayBlueBlockSound();
             spriteRenderer.sprite = movingSprite;
             spriteRenderer.sortingOrder = 3;
-            yield return new WaitForSeconds(0.10f);
+            yield return new WaitForSeconds(redFlashTime);
         }
+
+        GameSoundManager.instance.PlayBlockPlaceSound();
 
         currentCell = GetCellBelow();
         currentCell.block = this;        
@@ -147,6 +162,27 @@ public class Block : MonoBehaviour
             currentCell.player.Die();
         }
         moving = false;
+        placing = false;
+    }
+
+    int lastDifficulty;
+    public void AdjustPlaceFlashTimers(int difficulty)
+    {
+        if (difficulty != lastDifficulty)
+        {
+            redFlashTime -= (difficulty * 0.01f);
+            if (redFlashTime < 0.10f)
+            {
+                redFlashTime = 0.10f;
+            }
+            blueFlashTime -= (difficulty * 0.01f);
+            if (blueFlashTime < 0.025f)
+            {
+                blueFlashTime = 0.025f;
+            }
+            lastDifficulty = difficulty;
+        }
+        
     }
 
     bool BlockUnderneath()
@@ -181,6 +217,7 @@ public class Block : MonoBehaviour
         
         if (hp <= 0)
         {
+            GameSoundManager.instance.PlayBlockBreakSound();
             Vector3 position = transform.position;
             Destroy(gameObject);
             currentCell.block = null;

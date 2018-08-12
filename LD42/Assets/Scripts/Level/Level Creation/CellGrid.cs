@@ -28,7 +28,7 @@ public class CellGrid : MonoBehaviour
 
     float timeSinceLastSpawn = 0;
     float spawnTimer = 5f;
-    int spawnRate = 5;
+    int spawnRate = 2;
 
     float baseBlockMoveCooldown = 1f;
     float blockMoveCooldown = 2f;
@@ -80,10 +80,10 @@ public class CellGrid : MonoBehaviour
     private void Update()
     {
 
-        spawnRate = (int) difficulty / 5;
-        if (spawnRate > 10)
+        spawnRate = (int) (difficulty / 3) + 1;
+        if (spawnRate > cellCountX)
         {
-            spawnRate = 10;
+            spawnRate = cellCountX;
         }
         else if (spawnRate < 1)
         {
@@ -91,18 +91,22 @@ public class CellGrid : MonoBehaviour
         }
 
         spawnTimer = 2 - (difficulty * 0.1f);
-        if (spawnTimer < 0.2f)
+        if (spawnTimer < 0.05f)
         {
-            spawnTimer = 0.2f;
+            spawnTimer = 0.05f;
         }
 
-        blockMoveCooldown = 2 - ((int)( difficulty / 5) * 0.1f);
-        if (blockMoveCooldown < 0.1f)
+        blockMoveCooldown = 1.5f - ((int)(difficulty) * 0.1f);
+        if (blockMoveCooldown < 0.05f)
         {
-            blockMoveCooldown = 0.1f;
+            blockMoveCooldown = 0.05f;
         }
 
-        blockMoveSpeed = 5f + ((int) difficulty / 5);
+        //blockMoveSpeed = 5f + ((float) difficulty / 20);
+        //if (blockMoveSpeed > 20f)
+        //{
+        //    blockMoveSpeed = 20f;
+        //}
 
         timeSinceLastSpawn += Time.deltaTime;
         if (timeSinceLastSpawn > spawnTimer)
@@ -114,6 +118,18 @@ public class CellGrid : MonoBehaviour
                 SpawnBlock();
             }
             spawnsThisRound.Clear();
+        }
+
+        AdjustBlocksFlashTimes();
+    }
+
+    void AdjustBlocksFlashTimes()
+    {
+        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Block");
+
+        for (var i = 0; i < gameObjects.Length; i++)
+        {
+            gameObjects[i].GetComponent<Block>().AdjustPlaceFlashTimers(difficulty);
         }
     }
 
