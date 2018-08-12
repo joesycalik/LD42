@@ -9,8 +9,11 @@ public class GameOverMenu : MonoBehaviour
 
     private void OnEnable()
     {
-        timeSurvivedText.text = levelManager.timeElapsed.ToString("00");
-        scoreText.text = levelManager.scoreText.text;
+        //timeElapsedText.text = "Time Elapsed: " + timeElapsed.ToString("00");
+        //scoreText.text = "Score\n" + cellGrid.GetPlayer().GetScore();
+
+        timeSurvivedText.text = "Time Elapsed\n" + levelManager.timeElapsed.ToString("00");
+        scoreText.text = "Score\n" + levelManager.cellGrid.GetPlayer().GetScore();
     }
 
     public void Open()
