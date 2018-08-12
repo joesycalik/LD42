@@ -23,8 +23,9 @@ public class Player : MonoBehaviour {
     bool moving;
 
     public float moveSpeed = 6.65f;
-
+    
     bool shadowed = false;
+    float lastMoveSoundTime = 0;
 
     private void Start()
     {
@@ -127,7 +128,13 @@ public class Player : MonoBehaviour {
             currentCell = targetCell;
             currentCell.player = this;
             Vector3 targetPosition = currentCell.transform.localPosition + yVector;
-            GameSoundManager.instance.PlayMoveSound();
+
+            
+            if (Time.time - lastMoveSoundTime >= 0.3f)
+            {
+                GameSoundManager.instance.PlayMoveSound();
+                lastMoveSoundTime = Time.time;
+            }
             StartCoroutine(AnimateMove(startPos, targetPosition));
         }
         else if (targetCell && targetCell.HasBlock())
