@@ -10,6 +10,9 @@ public class GameManager : MonoBehaviour
 
     private static GameManager m_instance = null;
 
+    public int highScore;
+    public int bestTime;
+
     public static GameManager instance
     {
         get

@@ -6,14 +6,28 @@ public class GameOverMenu : MonoBehaviour
     public LevelManager levelManager;
 
     public Text timeSurvivedText, scoreText;
+    public Text bestTimeText, highScoreText;
 
     private void OnEnable()
     {
-        //timeElapsedText.text = "Time Elapsed: " + timeElapsed.ToString("00");
-        //scoreText.text = "Score\n" + cellGrid.GetPlayer().GetScore();
+        int timeElapsed = (int) levelManager.timeElapsed;
+        int score = levelManager.cellGrid.GetPlayer().GetScore();
 
-        timeSurvivedText.text = "Time Elapsed\n" + levelManager.timeElapsed.ToString("00");
-        scoreText.text = "Score\n" + levelManager.cellGrid.GetPlayer().GetScore();
+        if (timeElapsed > GameManager.instance.bestTime)
+        {
+            GameManager.instance.bestTime = timeElapsed;
+        }
+
+        if (score > GameManager.instance.highScore)
+        {
+            GameManager.instance.highScore = score;
+        }
+
+        timeSurvivedText.text = "Time: " + timeElapsed;
+        scoreText.text = "Score: " + score;
+
+        bestTimeText.text = "Best Time: " + GameManager.instance.bestTime;
+        highScoreText.text = "High Score: " + GameManager.instance.highScore;
     }
 
     public void Open()

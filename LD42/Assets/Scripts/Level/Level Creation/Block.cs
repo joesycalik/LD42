@@ -171,14 +171,14 @@ public class Block : MonoBehaviour
         if (difficulty != lastDifficulty)
         {
             redFlashTime -= (difficulty * 0.01f);
-            if (redFlashTime < 0.10f)
+            if (redFlashTime < 0.05f)
             {
-                redFlashTime = 0.10f;
+                redFlashTime = 0.025f;
             }
             blueFlashTime -= (difficulty * 0.01f);
-            if (blueFlashTime < 0.025f)
+            if (blueFlashTime < 0.01f)
             {
-                blueFlashTime = 0.025f;
+                blueFlashTime = 0.01f;
             }
             lastDifficulty = difficulty;
         }
