@@ -56,6 +56,7 @@ public class Block : MonoBehaviour
             }
 
         }
+        moveSpeed = cellGrid.blockMoveSpeed;
     }
 
     public void SetStartPosition()
@@ -103,16 +104,16 @@ public class Block : MonoBehaviour
 
         transform.position = targetPos;
 
-        if (transform.position.x < 0 || transform.position.x > (cellGrid.cellCountX * 20)
-            || transform.position.z < 0 || transform.position.z > (cellGrid.cellCountX * 20))
+        if (transform.position.x < 0 || transform.position.x > (cellGrid.cellCountX * 18)
+            || transform.position.z < 0 || transform.position.z > (cellGrid.cellCountX * 18))
         {
             Destroy(gameObject);
         }
 
-        if (!BlockUnderneath() && GetCellBelow() != null)
+        if (!BlockUnderneath() && GetCellBelow())
         {
             bool placeBlock = UnityEngine.Random.Range(0, 10) > 8 ? true : false;
-            if (placeBlock)
+            if (placeBlock && !GetCellBelow().shattered)
             {
                 StartCoroutine(PlaceBlock());
             }
@@ -135,8 +136,9 @@ public class Block : MonoBehaviour
             yield return new WaitForSeconds(0.10f);
         }
 
-        currentCell = GetCellBelow();
         currentCell.block = this;
+        currentCell = GetCellBelow();
+        
 
         spriteRenderer.sprite = placedSprite;
         spriteRenderer.sortingOrder = 1;
@@ -180,10 +182,20 @@ public class Block : MonoBehaviour
         
         if (hp <= 0)
         {
+            Vector3 position = transform.position;
+            Destroy(gameObject);
             currentCell.block = null;
             currentCell.shattered = true;
             cellGrid.GetPlayer().IncreaseScore();
-            Destroy(gameObject);
+
+            GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Block");
+            for (var i = 0; i < gameObjects.Length; i++)
+            {
+                if (gameObjects[i].transform.position == position)
+                {
+                    Destroy(gameObjects[i]);
+                }
+            }
         }
     }
 }

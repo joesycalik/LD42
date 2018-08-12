@@ -32,6 +32,7 @@ public class CellGrid : MonoBehaviour
 
     float baseBlockMoveCooldown = 1f;
     float blockMoveCooldown = 2f;
+    public float blockMoveSpeed = 5f;
 
     Player player;
 
@@ -79,7 +80,7 @@ public class CellGrid : MonoBehaviour
     private void Update()
     {
 
-        spawnRate = (int) difficulty / 3;
+        spawnRate = (int) difficulty / 5;
         if (spawnRate > 10)
         {
             spawnRate = 10;
@@ -95,11 +96,13 @@ public class CellGrid : MonoBehaviour
             spawnTimer = 0.2f;
         }
 
-        blockMoveCooldown = 2 - ((difficulty / 3) * 0.1f);
+        blockMoveCooldown = 2 - ((int)( difficulty / 5) * 0.1f);
         if (blockMoveCooldown < 0.1f)
         {
             blockMoveCooldown = 0.1f;
         }
+
+        blockMoveSpeed = 5f + ((int) difficulty / 5);
 
         timeSinceLastSpawn += Time.deltaTime;
         if (timeSinceLastSpawn > spawnTimer)
