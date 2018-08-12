@@ -9,7 +9,7 @@ public class GameOverMenu : MonoBehaviour
 
     private void OnEnable()
     {
-        timeSurvivedText.text = levelManager.timeElapsedText.text;
+        timeSurvivedText.text = levelManager.timeElapsed.ToString("00");
         scoreText.text = levelManager.scoreText.text;
     }
 

@@ -57,6 +57,24 @@ public class Cell : MonoBehaviour
         } //End Color getter
     } //End Color
 
+    public bool shattered = false;
+    float timeSinceShatter = 0f;
+    float shatterCooldown = 0.15f;
+
+    private void Update()
+    {
+        if (shattered)
+        {
+            timeSinceShatter += Time.deltaTime;
+            if (timeSinceShatter > shatterCooldown)
+            {
+                //Action
+                timeSinceShatter = 0;
+                shattered = false;
+            }
+        }
+    }
+
     /// <summary>
     /// Neighbor methods
     /// Getter and Setter

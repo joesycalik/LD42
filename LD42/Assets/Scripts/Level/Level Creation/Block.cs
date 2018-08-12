@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Block : MonoBehaviour
@@ -9,14 +10,18 @@ public class Block : MonoBehaviour
     bool placed = false;
     public SpriteRenderer spriteRenderer;
     public Sprite movingSprite;
+    public Sprite warningSprite;
+    public Sprite flashSprite;
     public Sprite placedSprite;
+    public List<Sprite> damagedSprites;
 
     float movingBlockY = 0.5f;
     float placedBlockY = 0.40f;
 
     public float timeSinceLastMove;
 
-    int hp = 3;
+    int maxHP = 3;
+    int hp;
 
     Cell currentCell;
 
@@ -24,10 +29,15 @@ public class Block : MonoBehaviour
 
     Animator anim;
 
+    float moveSpeed = 5f;
+
+    int damagedSpriteID = -1;
+
     private void Start()
     {
         spriteRenderer.sprite = movingSprite;
         anim = GetComponent<Animator>();
+        hp = maxHP;
     }
 
     private void Update()
@@ -44,6 +54,7 @@ public class Block : MonoBehaviour
                     Move();
                 }
             }
+
         }
     }
 
@@ -78,13 +89,13 @@ public class Block : MonoBehaviour
             targetPosition = new Vector3(transform.localPosition.x - 20, movingBlockY, transform.position.z);
         }
 
-        StartCoroutine(AnimateMove(startPosition, targetPosition)); 
+        StartCoroutine(AnimateMove(startPosition, targetPosition));
     }
 
     IEnumerator AnimateMove(Vector3 startPos, Vector3 targetPos)
     {
-        float t = Time.deltaTime * 5f;
-        for (; t < 1f; t += Time.deltaTime * 5f)
+        float t = Time.deltaTime * moveSpeed;
+        for (; t < 1f; t += Time.deltaTime * moveSpeed)
         {
             transform.localPosition = Vector3.Lerp(startPos, targetPos, t);
             yield return null;
@@ -92,8 +103,8 @@ public class Block : MonoBehaviour
 
         transform.position = targetPos;
 
-        if (transform.position.x < 0 || transform.position.x > (cellGrid.cellCountX * 18)
-            || transform.position.z < 0 || transform.position.z > (cellGrid.cellCountX * 18))
+        if (transform.position.x < 0 || transform.position.x > (cellGrid.cellCountX * 20)
+            || transform.position.z < 0 || transform.position.z > (cellGrid.cellCountX * 20))
         {
             Destroy(gameObject);
         }
@@ -103,18 +114,30 @@ public class Block : MonoBehaviour
             bool placeBlock = UnityEngine.Random.Range(0, 10) > 8 ? true : false;
             if (placeBlock)
             {
-                PlaceBlock();
+                StartCoroutine(PlaceBlock());
             }
         }
 
         moving = false;
     }
 
-    void PlaceBlock()
+    IEnumerator PlaceBlock()
     {
         transform.position = new Vector3(transform.position.x, placedBlockY, transform.position.z);
+
+        for (int i = 0; i < 3; i++)
+        {
+            spriteRenderer.sprite = warningSprite;
+            spriteRenderer.sortingOrder = 4;
+            yield return new WaitForSeconds(0.25f);
+            spriteRenderer.sprite = movingSprite;
+            spriteRenderer.sortingOrder = 3;
+            yield return new WaitForSeconds(0.10f);
+        }
+
         currentCell = GetCellBelow();
         currentCell.block = this;
+
         spriteRenderer.sprite = placedSprite;
         spriteRenderer.sortingOrder = 1;
         placed = true;
@@ -122,6 +145,7 @@ public class Block : MonoBehaviour
         {
             currentCell.player.Die();
         }
+        moving = false;
     }
 
     bool BlockUnderneath()
@@ -136,17 +160,29 @@ public class Block : MonoBehaviour
         }
     }
 
-    Cell GetCellBelow()
+    public Cell GetCellBelow()
     {
         return Helpers.GetCellUnderPosition(cellGrid, transform.position);
     }
 
-    public void TakeHit()
+    public IEnumerator TakeHit()
     {
         hp -= 1;
+        damagedSpriteID++;
+        if (damagedSpriteID > 1)
+        {
+            damagedSpriteID = 1;
+        }
+
+        spriteRenderer.sprite = flashSprite;
+        yield return new WaitForSeconds(0.0005f);
+        spriteRenderer.sprite = damagedSprites[damagedSpriteID];
+        
         if (hp <= 0)
         {
             currentCell.block = null;
+            currentCell.shattered = true;
+            cellGrid.GetPlayer().IncreaseScore();
             Destroy(gameObject);
         }
     }

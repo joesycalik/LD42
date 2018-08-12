@@ -9,10 +9,12 @@ public class Player : MonoBehaviour {
     public Cell currentCell;
 
     public SpriteRenderer spriteRenderer;
+    public SpriteRenderer shadowRenderer;
 
-    float timeSinceLastAttack;
-    float attackCooldown = 0.10f;
-    bool canAttack;
+    public List<Sprite> normalSprites;
+    public List<Sprite> shadowSprites;
+
+    bool canAttack = true;
 
     int score = 0;
 
@@ -20,25 +22,33 @@ public class Player : MonoBehaviour {
 
     bool moving;
 
+    public float moveSpeed = 6.65f;
+
+    bool shadowed = false;
+
     private void Start()
     {
         currentCell = cellGrid.cells[Random.Range(0, cellGrid.cells.Length)];
         transform.position = currentCell.transform.position + yVector;
+        spriteRenderer.flipX =  Random.Range(0, 2) == 0 ? true : false;
+        shadowRenderer.flipX = spriteRenderer.flipX;
+
+        spriteRenderer.sprite = normalSprites[0];
+        shadowRenderer.sprite = shadowSprites[0];
+
     }
 
     // Update is called once per frame
     void Update () {
         HandleInput();
-    }
-
-    private void FixedUpdate()
-    {
-        timeSinceLastAttack += Time.deltaTime;
-        if (timeSinceLastAttack > attackCooldown && !canAttack)
+        CheckRenderShadow();
+        if (moving)
         {
-            //Action
-            //timeSinceLastAttack = 0;
-            canAttack = true;
+            SwapSprites(1);
+        }
+        else
+        {
+            SwapSprites(0);
         }
     }
 
@@ -55,6 +65,7 @@ public class Player : MonoBehaviour {
             if (spriteRenderer.flipX)
             {
                 spriteRenderer.flipX = false;
+                shadowRenderer.flipX = false;
             }
 
             Move(Direction.WEST);
@@ -70,15 +81,45 @@ public class Player : MonoBehaviour {
             if (!spriteRenderer.flipX)
             {
                 spriteRenderer.flipX = true;
+                shadowRenderer.flipX = true;
             }
             Move(Direction.EAST);
+        }
+    }
+
+    void CheckRenderShadow()
+    {
+        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Block");
+
+        bool renderShadow = false;
+        for (var i = 0; i < gameObjects.Length; i++)
+        {
+            if (currentCell == gameObjects[i].GetComponent<Block>().GetCellBelow())
+            {
+                renderShadow = true;
+                break;
+            }
+            else
+            {
+                renderShadow = false;
+            }
+        }
+        if (renderShadow)
+        {
+            shadowRenderer.gameObject.SetActive(true);
+            shadowed = true;
+        }
+        else
+        {
+            shadowRenderer.gameObject.SetActive(false);
+            shadowed = false;
         }
     }
 
     void Move(Direction direction)
     {
         Cell targetCell = currentCell.GetNeighbor(direction);
-        if (targetCell && !targetCell.HasBlock())
+        if (targetCell && !targetCell.HasBlock() && !targetCell.shattered)
         {
             moving = true;
             currentCell.player = null;
@@ -92,19 +133,16 @@ public class Player : MonoBehaviour {
         {
             if (canAttack)
             {
+                canAttack = false;
                 moving = true;
                 StartCoroutine(AttackBlock(direction));
-                targetCell.block.TakeHit();
-                if (targetCell.block == null)
-                {
-                    IncreaseScore();
-                }
+                StartCoroutine(targetCell.block.TakeHit());
                 moving = false;
             }
         }
     }
 
-    void IncreaseScore()
+    public void IncreaseScore()
     {
         score++;
     }
@@ -118,22 +156,23 @@ public class Player : MonoBehaviour {
     {
         Vector3 startPos = currentCell.transform.position + yVector;
         Vector3 delta;
+        int deltaMultiplier = 30;
         switch (direction)
         {
             case Direction.NORTH:
-                delta = new Vector3(0, 0, 10);
+                delta = new Vector3(0, 0, 1 * deltaMultiplier);
                 break;
 
             case Direction.WEST:
-                delta = new Vector3(-10, 0, 0);
+                delta = new Vector3(-1 * deltaMultiplier, 0, 0);
                 break;
 
             case Direction.SOUTH:
-                delta = new Vector3(0, 0, -10);
+                delta = new Vector3(0, 0, -1 * deltaMultiplier);
                 break;
 
             case Direction.EAST:
-                delta = new Vector3(10, 0, 0);
+                delta = new Vector3(1 * deltaMultiplier, 0, 0);
                 break;
 
             default:
@@ -141,27 +180,44 @@ public class Player : MonoBehaviour {
                 break;
         }
         float t = Time.deltaTime;
-        for (; t < 0.01f; t += Time.deltaTime)
+        SwapSprites(1);
+        for (; t < 0.15f; t += Time.deltaTime)
         {
+            if (t > 0.5f)
+            {
+                SwapSprites(1);
+            }
             transform.position = Vector3.Lerp(startPos, startPos + delta, t);
             yield return null;
         }
 
-        for (; t < 0.025f; t += Time.deltaTime)
+        SwapSprites(0);
+        for (; t < 0.075f; t += Time.deltaTime)
         {
             transform.position = Vector3.Lerp(startPos + delta, startPos, t);
             yield return null;
         }
 
         transform.position = currentCell.transform.position + yVector;
-        canAttack = false;
-        timeSinceLastAttack = 0;
+        canAttack = true;
+    }
+
+    void SwapSprites(int spriteNum)
+    {
+        if (!shadowed)
+        {
+            spriteRenderer.sprite = normalSprites[spriteNum];
+        }
+        else
+        {
+            spriteRenderer.sprite = shadowSprites[spriteNum];
+        }
     }
 
     IEnumerator AnimateMove(Vector3 startPos, Vector3 targetPos)
     {
-        float t = Time.deltaTime * 6.75f;
-        for (; t < 1f; t += Time.deltaTime * 6.75f)
+        float t = Time.deltaTime * moveSpeed;
+        for (; t < 1f; t += Time.deltaTime * moveSpeed)
         {
             transform.localPosition = Vector3.Lerp(startPos, targetPos, t);
             yield return null;

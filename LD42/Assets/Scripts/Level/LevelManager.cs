@@ -19,12 +19,13 @@ public class LevelManager : MonoBehaviour
     public GameOverMenu gameOverMenu;
 
     int level;
-    float timeElapsed;
+    public float timeElapsed;
     float gameStartTime;
 
     private void Start()
     {
         gameStartTime = Time.time;
+        scoreText.text = "Score\n" + 0;
     }
 
     //Check for user input
@@ -48,6 +49,7 @@ public class LevelManager : MonoBehaviour
 
     public void RestartGame()
     {
+        DestroyAllBlocks();
         cellGrid.NewGame();
         gameStartTime = Time.time;
     }
@@ -60,8 +62,8 @@ public class LevelManager : MonoBehaviour
     //Update the Level Stats and their UI elements
     void UpdateUI()
     {
-        timeElapsedText.text = "Time Elapsed: " + timeElapsed.ToString("00");
-        scoreText.text = "Score: " + cellGrid.GetPlayer().GetScore();
+        //timeElapsedText.text = "Time Elapsed: " + timeElapsed.ToString("00");
+        scoreText.text = "Score\n" + cellGrid.GetPlayer().GetScore();
     } //End UpdateUI()
 
     public void DestroyAllBlocks()

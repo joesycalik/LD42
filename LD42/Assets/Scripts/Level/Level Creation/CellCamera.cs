@@ -50,7 +50,7 @@ public class CellCamera : MonoBehaviour
     {
         if (cellCountX == cellCountZ)
         {
-            yPosition = (cellCountX * 18);
+            yPosition = (cellCountX * 20);
             NorthX = 40 + ((cellCountX - currentCellCountX) * 10);
 
             transform.position = new Vector3(NorthX, yPosition, NorthX);
