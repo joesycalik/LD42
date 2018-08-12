@@ -136,9 +136,8 @@ public class Block : MonoBehaviour
             yield return new WaitForSeconds(0.10f);
         }
 
-        currentCell.block = this;
         currentCell = GetCellBelow();
-        
+        currentCell.block = this;        
 
         spriteRenderer.sprite = placedSprite;
         spriteRenderer.sortingOrder = 1;

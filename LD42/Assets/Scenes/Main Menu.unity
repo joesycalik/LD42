@@ -1167,7 +1167,7 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: 'LD42: Oddblock?
 
-    Obblock?'
+    Obblock? Lockblock?'
 --- !u!222 &1323118956
 CanvasRenderer:
   m_ObjectHideFlags: 0
