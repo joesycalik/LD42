@@ -28,4 +28,9 @@ public class MainMenu : MonoBehaviour
         gameObject.SetActive(true);
         howToPlayMenu.SetActive(false);
     }
+
+    public void PlayUISound()
+    {
+        GameSoundManager.instance.PlayUISound();
+    }
 }

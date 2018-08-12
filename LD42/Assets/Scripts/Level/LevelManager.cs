@@ -75,4 +75,9 @@ public class LevelManager : MonoBehaviour
             Destroy(gameObjects[i]);
         }
     }
+
+    public void PlayUISound()
+    {
+        GameSoundManager.instance.PlayUISound();
+    }
 } //End LevelManager class

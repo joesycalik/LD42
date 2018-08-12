@@ -4,7 +4,7 @@ public class GameSoundManager : MonoBehaviour
 {
 
     public AudioSource soundFXSource;
-    //public AudioSource musicSource;
+    public AudioSource musicSource;
     public AudioClip moveSound;
     public AudioClip attackSound;
     public AudioClip blockPlaceSound;
@@ -12,6 +12,7 @@ public class GameSoundManager : MonoBehaviour
     public AudioClip blockBreakSound;
     public AudioClip playerDeathSound;
     public AudioClip redBlockSound, blueBlockSound, warningSound;
+
     
 
     private static GameSoundManager m_instance = null;
