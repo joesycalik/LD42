@@ -32,7 +32,7 @@ public class LevelManager : MonoBehaviour
     private void Update()
     {
         timeElapsed = Time.time - gameStartTime;
-        cellGrid.difficulty = (int)(timeElapsed / 15) + 1;
+        cellGrid.difficulty = (int)(timeElapsed / 15) + 3;
 
         UpdateUI();
 
